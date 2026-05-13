@@ -107,7 +107,13 @@ fun DetailScreen(
                 }
 
                 itemsIndexed(List(5) { it }) { index, _ ->
-                    RecentlyPlayedItem(album = currentAlbum, onClick = {}, onPlayClick = { onPlayClick(currentAlbum) })
+                    RecentlyPlayedItem(
+                        album = currentAlbum,
+                        isFavorite = isFavorite,
+                        onFavoriteClick = onFavoriteClick,
+                        onClick = {},
+                        onPlayClick = { onPlayClick(currentAlbum) }
+                    )
                 }
             }
         }
