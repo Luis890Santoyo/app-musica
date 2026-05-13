@@ -25,7 +25,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
 @Composable
-fun MiniPlayer(currentAlbum: Album? = null) {
+fun MiniPlayer(
+    currentAlbum: Album? = null,
+    onClick: () -> Unit = {}
+) {
     var isPlaying by remember { mutableStateOf(false) }
 
     Surface(
@@ -35,6 +38,7 @@ fun MiniPlayer(currentAlbum: Album? = null) {
             .height(80.dp)
             .padding(8.dp)
             .clip(RoundedCornerShape(24.dp))
+            .clickable(enabled = currentAlbum != null) { onClick() }
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),

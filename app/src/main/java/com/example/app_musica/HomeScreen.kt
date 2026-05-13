@@ -1,11 +1,14 @@
 package com.example.app_musica
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -26,14 +29,17 @@ fun HomeScreen(
 ) {
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
+    var showOnlyFavorites by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
     val bgColor = Color(0xFFE6E1FF)
 
-    // Filtrar álbumes en tiempo real basándose en la búsqueda
+    // Filtrar álbumes basándose en búsqueda y favoritos
     val filteredAlbums = albums.filter {
-        it.title.contains(searchQuery, ignoreCase = true) ||
-        it.artist.contains(searchQuery, ignoreCase = true)
+        val matchesSearch = it.title.contains(searchQuery, ignoreCase = true) ||
+                           it.artist.contains(searchQuery, ignoreCase = true)
+        val matchesFavorite = if (showOnlyFavorites) favoriteAlbums.contains(it.id) else true
+        matchesSearch && matchesFavorite
     }
 
     LaunchedEffect(Unit) {
@@ -90,6 +96,31 @@ fun HomeScreen(
                                     singleLine = true
                                 )
                             }
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            // Botón de filtro para favoritos
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showOnlyFavorites = !showOnlyFavorites },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = if (showOnlyFavorites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = null,
+                                    tint = if (showOnlyFavorites) Color.Red else Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Solo mostrar favoritos",
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    fontSize = 14.sp,
+                                    fontWeight = if (showOnlyFavorites) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+
                             Spacer(modifier = Modifier.height(24.dp))
                             Text("¡Buenos días!", color = Color.White.copy(alpha = 0.8f), fontSize = 18.sp)
                             Text("Luis Santoyo", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)

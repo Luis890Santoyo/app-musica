@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -45,13 +48,22 @@ fun MusicAppRootContainer() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            MiniPlayer(currentAlbum = currentPlayingAlbum)
+            MiniPlayer(
+                currentAlbum = currentPlayingAlbum,
+                onClick = {
+                    currentPlayingAlbum?.let { album ->
+                        navController.navigate(UniqueDetailRoute(albumId = album.id))
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             NavHost(
                 navController = navController,
-                startDestination = UniqueHomeRoute
+                startDestination = UniqueHomeRoute,
+                enterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(400)) },
+                exitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(400)) }
             ) {
                 composable<UniqueHomeRoute> {
                     HomeScreen(
