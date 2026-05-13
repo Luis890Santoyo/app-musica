@@ -25,27 +25,29 @@ fun HomeScreen(
     onPlayClick: (Album) -> Unit
 ) {
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
 
-    val bgColor = Color(0xFFE6E1FF) // Fondo lavanda claro
+    val bgColor = Color(0xFFE6E1FF)
+
+    // Filtrar álbumes en tiempo real basándose en la búsqueda
+    val filteredAlbums = albums.filter {
+        it.title.contains(searchQuery, ignoreCase = true) ||
+        it.artist.contains(searchQuery, ignoreCase = true)
+    }
 
     LaunchedEffect(Unit) {
         try {
-            albums = RetrofitClient.instance.getAlbums()
-            if (albums.isEmpty()) {
-                albums = getMockAlbums()
-            }
-            isLoading = false
+            val fetchedAlbums = RetrofitClient.instance.getAlbums()
+            albums = if (fetchedAlbums.isEmpty()) getMockAlbums() else fetchedAlbums
         } catch (e: Exception) {
             albums = getMockAlbums()
+        } finally {
             isLoading = false
         }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = bgColor
-    ) {
+    Surface(modifier = Modifier.fillMaxSize(), color = bgColor) {
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color(0xFF7C4DFF))
@@ -55,12 +57,9 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                // Cabecera con saludo
                 item {
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         shape = RoundedCornerShape(32.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF8B5CF6))
                     ) {
@@ -71,31 +70,46 @@ fun HomeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
-                                Icon(Icons.Default.Search, contentDescription = null, tint = Color.White)
+                                
+                                // Campo de búsqueda dinámico
+                                TextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    placeholder = { Text("Buscar álbum o artista...", color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp) },
+                                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.White,
+                                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                                        cursorColor = Color.White,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    ),
+                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White) },
+                                    singleLine = true
+                                )
                             }
                             Spacer(modifier = Modifier.height(24.dp))
-                            Text(
-                                text = "¡Buenos días!",
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontSize = 18.sp
-                            )
-                            Text(
-                                text = "Luis Santoyo",
-                                color = Color.White,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
+                            Text("¡Buenos días!", color = Color.White.copy(alpha = 0.8f), fontSize = 18.sp)
+                            Text("Luis Santoyo", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
                         }
                     }
                 }
 
-                // Sección de Álbumes Horizontales
+                // Mostrar mensaje si no hay resultados
+                if (filteredAlbums.isEmpty() && searchQuery.isNotEmpty()) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                            Text("No se encontraron coincidencias", color = Color.Gray)
+                        }
+                    }
+                }
+
                 item {
-                    SectionHeader(title = "Álbumes")
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        items(albums) { album ->
+                    SectionHeader(title = if (searchQuery.isEmpty()) "Álbumes" else "Resultados de búsqueda")
+                    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
+                        items(filteredAlbums) { album ->
                             AlbumCard(
                                 album = album,
                                 isFavorite = favoriteAlbums.contains(album.id),
@@ -107,12 +121,13 @@ fun HomeScreen(
                     }
                 }
 
-                // Sección de Lista Vertical
-                item {
-                    SectionHeader(title = "Escuchado recientemente")
+                if (searchQuery.isEmpty()) {
+                    item {
+                        SectionHeader(title = "Escuchado recientemente")
+                    }
                 }
 
-                items(albums) { album ->
+                items(filteredAlbums) { album ->
                     RecentlyPlayedItem(
                         album = album,
                         isFavorite = favoriteAlbums.contains(album.id),
