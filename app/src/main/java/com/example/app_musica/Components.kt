@@ -1,13 +1,11 @@
 package com.example.app_musica
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -29,7 +27,7 @@ fun MiniPlayer(currentAlbum: Album? = null) {
     var isPlaying by remember { mutableStateOf(false) }
 
     Surface(
-        color = Color(0xFF1E0E3E),
+        color = Color(0xFF1E0E3E), // Púrpura oscuro
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
@@ -59,23 +57,34 @@ fun MiniPlayer(currentAlbum: Album? = null) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(currentAlbum?.title ?: "Selecciona una canción", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    Text(currentAlbum?.artist ?: "Artista", color = Color.LightGray, fontSize = 12.sp)
+                    Text(currentAlbum?.artist ?: "Nombre del artista", color = Color.LightGray, fontSize = 12.sp)
                 }
             }
-            IconButton(
-                onClick = { isPlaying = !isPlaying },
-                modifier = Modifier.background(Color.White, CircleShape).size(40.dp)
+            Surface(
+                shape = CircleShape,
+                color = Color.White,
+                modifier = Modifier.size(40.dp).clickable { isPlaying = !isPlaying }
             ) {
-                Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun AlbumCard(album: Album, onClick: () -> Unit, onPlayClick: () -> Unit) {
+fun AlbumCard(album: Album, onClick: () -> Unit) {
     Surface(
-        modifier = Modifier.width(180.dp).padding(8.dp).clickable { onClick() },
+        modifier = Modifier
+            .width(180.dp)
+            .padding(8.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         color = Color.White
     ) {
@@ -84,11 +93,16 @@ fun AlbumCard(album: Album, onClick: () -> Unit, onPlayClick: () -> Unit) {
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(album.image)
                     .setHeader("User-Agent", "Mozilla/5.0")
+                    .crossfade(true)
                     .build(),
                 contentDescription = null,
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
+            
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -96,15 +110,25 @@ fun AlbumCard(album: Album, onClick: () -> Unit, onPlayClick: () -> Unit) {
                     .padding(8.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color.Black.copy(alpha = 0.7f))
-                    .padding(8.dp)
+                    .padding(12.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(album.title, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                        Text(album.artist, color = Color.LightGray, fontSize = 10.sp, maxLines = 1)
+                        Text(album.title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                        Text(album.artist, color = Color.LightGray, fontSize = 11.sp, maxLines = 1)
                     }
-                    IconButton(onClick = onPlayClick, modifier = Modifier.size(24.dp).background(Color.White, CircleShape)) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
             }
@@ -113,25 +137,37 @@ fun AlbumCard(album: Album, onClick: () -> Unit, onPlayClick: () -> Unit) {
 }
 
 @Composable
-fun RecentlyPlayedItem(album: Album, onClick: () -> Unit, onPlayClick: () -> Unit) {
+fun RecentlyPlayedItem(album: Album, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).clickable { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current).data(album.image).setHeader("User-Agent", "Mozilla/5.0").build(),
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(album.image)
+                    .setHeader("User-Agent", "Mozilla/5.0")
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
-                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(album.title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(album.title, fontWeight = FontWeight.Bold, color = Color.Black, fontSize = 15.sp)
                 Text(album.artist, color = Color.Gray, fontSize = 13.sp)
             }
-            IconButton(onClick = onPlayClick) {
+            IconButton(onClick = { }) {
                 Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color(0xFF8B5CF6))
             }
         }

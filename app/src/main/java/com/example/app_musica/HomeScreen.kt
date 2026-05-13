@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HomeScreen(onAlbumClick: (String) -> Unit, onPlayClick: (Album) -> Unit) {
+fun HomeScreen(onAlbumClick: (String) -> Unit) {
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -48,9 +48,9 @@ fun HomeScreen(onAlbumClick: (String) -> Unit, onPlayClick: (Album) -> Unit) {
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 100.dp)
+                contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                // Cabecera
+                // Cabecera con saludo
                 item {
                     Card(
                         modifier = Modifier
@@ -84,33 +84,25 @@ fun HomeScreen(onAlbumClick: (String) -> Unit, onPlayClick: (Album) -> Unit) {
                     }
                 }
 
-                // Sección de Álbumes
+                // Sección de Álbumes Horizontales
                 item {
                     SectionHeader(title = "Álbumes")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         items(albums) { album ->
-                            AlbumCard(
-                                album = album,
-                                onClick = { onAlbumClick(album.id) },
-                                onPlayClick = { onPlayClick(album) }
-                            )
+                            AlbumCard(album = album, onClick = { onAlbumClick(album.id) })
                         }
                     }
                 }
 
-                // Sección de Reproducciones Recientes
+                // Sección de Lista Vertical
                 item {
                     SectionHeader(title = "Escuchado recientemente")
                 }
 
                 items(albums) { album ->
-                    RecentlyPlayedItem(
-                        album = album,
-                        onClick = { onAlbumClick(album.id) },
-                        onPlayClick = { onPlayClick(album) }
-                    )
+                    RecentlyPlayedItem(album = album, onClick = { onAlbumClick(album.id) })
                 }
             }
         }
