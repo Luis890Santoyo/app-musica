@@ -39,10 +39,17 @@ fun DetailScreen(
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(albumId) {
+        isLoading = true
         try {
-            album = RetrofitClient.instance.getAlbumById(albumId)
-            isLoading = false
+            val mockAlbum = getMockAlbums().find { it.id == albumId }
+            if (mockAlbum != null) {
+                album = mockAlbum
+            } else {
+                album = RetrofitClient.instance.getAlbumById(albumId)
+            }
         } catch (e: Exception) {
+            album = getMockAlbums().find { it.id == albumId }
+        } finally {
             isLoading = false
         }
     }
@@ -56,7 +63,7 @@ fun DetailScreen(
             val currentAlbum = album!!
             LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 100.dp)) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().height(400.dp).clip(RoundedCornerShape(bottomStart = 48.dp, bottomEnd = 48.dp))) {
+                    Box(modifier = Modifier.fillMaxWidth().height(420.dp).clip(RoundedCornerShape(bottomStart = 48.dp, bottomEnd = 48.dp))) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(currentAlbum.image).setHeader("User-Agent", "Mozilla/5.0").build(),
@@ -64,13 +71,13 @@ fun DetailScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
-                        Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)), startY = 500f)))
+                        Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)), startY = 600f)))
                         
                         Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                            IconButton(onClick = onBack, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                            IconButton(onClick = onBack) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
                             }
-                            IconButton(onClick = onFavoriteClick, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                            IconButton(onClick = onFavoriteClick) {
                                 Icon(
                                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                     contentDescription = null,
@@ -83,14 +90,24 @@ fun DetailScreen(
                             Text(currentAlbum.title, color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold)
                             Text(currentAlbum.artist, color = Color.LightGray, fontSize = 18.sp)
                             Spacer(modifier = Modifier.height(20.dp))
-                            Row {
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 Button(
                                     onClick = { onPlayClick(currentAlbum) },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6)),
                                     shape = CircleShape,
-                                    modifier = Modifier.size(56.dp)
+                                    modifier = Modifier.size(56.dp),
+                                    contentPadding = PaddingValues(0.dp)
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(32.dp))
+                                }
+                                Button(
+                                    onClick = { },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(56.dp),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(32.dp))
                                 }
                             }
                         }
@@ -98,21 +115,40 @@ fun DetailScreen(
                 }
                 
                 item {
-                    Card(modifier = Modifier.padding(16.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                    Card(
+                        modifier = Modifier.padding(16.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
                         Column(modifier = Modifier.padding(20.dp)) {
-                            Text("Sobre este álbum", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text("About this album", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF1E0E3E))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(currentAlbum.description, color = Color.Gray)
                         }
                     }
                 }
 
-                itemsIndexed(List(5) { it }) { index, _ ->
-                    RecentlyPlayedItem(
+                item {
+                    Surface(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color.White
+                    ) {
+                        Text(
+                            text = "Artist: ${currentAlbum.artist}",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                itemsIndexed(List(3) { it }) { index, _ ->
+                    TrackItem(
                         album = currentAlbum,
-                        isFavorite = isFavorite,
-                        onFavoriteClick = onFavoriteClick,
-                        onClick = {},
-                        onPlayClick = { onPlayClick(currentAlbum) }
+                        trackNumber = index + 1,
+                        onClick = { onPlayClick(currentAlbum) }
                     )
                 }
             }

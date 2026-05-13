@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -168,10 +169,7 @@ fun AlbumCard(
 @Composable
 fun RecentlyPlayedItem(
     album: Album,
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit,
-    onClick: () -> Unit,
-    onPlayClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -200,18 +198,60 @@ fun RecentlyPlayedItem(
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(album.title, fontWeight = FontWeight.Bold, color = Color.Black, fontSize = 15.sp)
-                Text(album.artist, color = Color.Gray, fontSize = 13.sp)
+                Text("${album.artist} • Popular Song", color = Color.Gray, fontSize = 13.sp)
             }
-            // Botón favorito
-            IconButton(onClick = onFavoriteClick) {
+            IconButton(onClick = { }) {
                 Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    imageVector = Icons.Default.MoreVert,
                     contentDescription = null,
-                    tint = if (isFavorite) Color.Red else Color.Gray
+                    tint = Color.Gray
                 )
             }
-            IconButton(onClick = onPlayClick) {
-                Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color(0xFF8B5CF6))
+        }
+    }
+}
+
+@Composable
+fun TrackItem(
+    album: Album,
+    trackNumber: Int,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(album.image)
+                    .setHeader("User-Agent", "Mozilla/5.0")
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("${album.title} • Track $trackNumber", fontWeight = FontWeight.Bold, color = Color.Black, fontSize = 15.sp)
+                Text(album.artist, color = Color.Gray, fontSize = 13.sp)
+            }
+            IconButton(onClick = { }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
             }
         }
     }
