@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -79,7 +81,13 @@ fun MiniPlayer(currentAlbum: Album? = null) {
 }
 
 @Composable
-fun AlbumCard(album: Album, onClick: () -> Unit) {
+fun AlbumCard(
+    album: Album,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    onClick: () -> Unit,
+    onPlayClick: () -> Unit
+) {
     Surface(
         modifier = Modifier
             .width(180.dp)
@@ -102,6 +110,23 @@ fun AlbumCard(album: Album, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
+
+            // Botón de favorito arriba a la derecha
+            IconButton(
+                onClick = onFavoriteClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .size(32.dp)
+                    .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (isFavorite) Color.Red else Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
             
             Box(
                 modifier = Modifier
@@ -124,7 +149,7 @@ fun AlbumCard(album: Album, onClick: () -> Unit) {
                     Surface(
                         shape = CircleShape,
                         color = Color.White,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(28.dp).clickable { onPlayClick() }
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(18.dp))
@@ -137,7 +162,13 @@ fun AlbumCard(album: Album, onClick: () -> Unit) {
 }
 
 @Composable
-fun RecentlyPlayedItem(album: Album, onClick: () -> Unit) {
+fun RecentlyPlayedItem(
+    album: Album,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    onClick: () -> Unit,
+    onPlayClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,7 +198,15 @@ fun RecentlyPlayedItem(album: Album, onClick: () -> Unit) {
                 Text(album.title, fontWeight = FontWeight.Bold, color = Color.Black, fontSize = 15.sp)
                 Text(album.artist, color = Color.Gray, fontSize = 13.sp)
             }
-            IconButton(onClick = { }) {
+            // Botón favorito
+            IconButton(onClick = onFavoriteClick) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (isFavorite) Color.Red else Color.Gray
+                )
+            }
+            IconButton(onClick = onPlayClick) {
                 Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color(0xFF8B5CF6))
             }
         }

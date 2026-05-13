@@ -9,10 +9,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +28,13 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
 @Composable
-fun DetailScreen(albumId: String, onBack: () -> Unit, onPlayClick: (Album) -> Unit) {
+fun DetailScreen(
+    albumId: String,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    onBack: () -> Unit,
+    onPlayClick: (Album) -> Unit
+) {
     var album by remember { mutableStateOf<Album?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -65,6 +70,13 @@ fun DetailScreen(albumId: String, onBack: () -> Unit, onPlayClick: (Album) -> Un
                             IconButton(onClick = onBack, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
                             }
+                            IconButton(onClick = onFavoriteClick, modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = null,
+                                    tint = if (isFavorite) Color.Red else Color.White
+                                )
+                            }
                         }
 
                         Column(modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)) {
@@ -85,7 +97,6 @@ fun DetailScreen(albumId: String, onBack: () -> Unit, onPlayClick: (Album) -> Un
                     }
                 }
                 
-                // Información del álbum
                 item {
                     Card(modifier = Modifier.padding(16.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                         Column(modifier = Modifier.padding(20.dp)) {
@@ -95,7 +106,6 @@ fun DetailScreen(albumId: String, onBack: () -> Unit, onPlayClick: (Album) -> Un
                     }
                 }
 
-                // Lista de canciones (simulada)
                 itemsIndexed(List(5) { it }) { index, _ ->
                     RecentlyPlayedItem(album = currentAlbum, onClick = {}, onPlayClick = { onPlayClick(currentAlbum) })
                 }

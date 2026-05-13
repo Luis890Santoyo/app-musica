@@ -18,7 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HomeScreen(onAlbumClick: (String) -> Unit) {
+fun HomeScreen(
+    favoriteAlbums: Set<String>,
+    onFavoriteClick: (String) -> Unit,
+    onAlbumClick: (String) -> Unit,
+    onPlayClick: (Album) -> Unit
+) {
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -91,7 +96,13 @@ fun HomeScreen(onAlbumClick: (String) -> Unit) {
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         items(albums) { album ->
-                            AlbumCard(album = album, onClick = { onAlbumClick(album.id) })
+                            AlbumCard(
+                                album = album,
+                                isFavorite = favoriteAlbums.contains(album.id),
+                                onFavoriteClick = { onFavoriteClick(album.id) },
+                                onClick = { onAlbumClick(album.id) },
+                                onPlayClick = { onPlayClick(album) }
+                            )
                         }
                     }
                 }
@@ -102,7 +113,13 @@ fun HomeScreen(onAlbumClick: (String) -> Unit) {
                 }
 
                 items(albums) { album ->
-                    RecentlyPlayedItem(album = album, onClick = { onAlbumClick(album.id) })
+                    RecentlyPlayedItem(
+                        album = album,
+                        isFavorite = favoriteAlbums.contains(album.id),
+                        onFavoriteClick = { onFavoriteClick(album.id) },
+                        onClick = { onAlbumClick(album.id) },
+                        onPlayClick = { onPlayClick(album) }
+                    )
                 }
             }
         }
